@@ -1,7 +1,5 @@
-import numpy as np
+
 from sklearn.linear_model import Ridge, LinearRegression
-from sklearn.model_selection import GridSearchCV
-from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 
 from project.pickle.pickleFun import loadFromPickle, saveToPickle
