@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.linear_model import Ridge
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, KFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, PolynomialFeatures
 
@@ -9,23 +9,35 @@ from project.pickle.pickleFun import saveToPickle, loadFromPickle
 
 def ridgeTrain(X_train, y_train):
     # Regressao usando o metodo Ridge
-
-    # grid de hiperparâmetros
     param_ridge = {
-        "model__alpha": np.logspace(-3, 3, 1000)
+        "poly__degree": [1, 2, 3, 4, 5, 6 , 7],
+        "ridge__alpha": np.logspace(-3, 3, 20)  # 0.001 a 1000
     }
 
-    pipeline = Pipeline([
-        ("poly", PolynomialFeatures(degree=4, include_bias=False)),
+    pipeline_ridge = Pipeline([
+        ("poly", PolynomialFeatures(include_bias=False)),
         ("scaler", StandardScaler()),
-        ("ridge", Ridge(alpha=1.0))
+        ("ridge", Ridge(random_state=42, max_iter=100000))
     ])
-    pipeline.fit(X_train, y_train)
+    # grid de hiperparâmetros
 
-    # gridsearch
-    #gs_ridge = GridSearchCV(pipeline, param_ridge, scoring="neg_root_mean_squared_error", n_jobs=-1)
-    #gs_ridge.fit(X_train, y_train)
-    saveToPickle(pipeline, "ridgeTrained")
+
+
+    cv_ridge = KFold(n_splits=5, shuffle=True, random_state=42)
+
+    gs_ridge = GridSearchCV(
+        estimator=pipeline_ridge,
+        param_grid=param_ridge,
+        scoring="neg_mean_squared_error",
+        cv=cv_ridge,
+        n_jobs=-1,
+        refit=True,  # refit com os melhores hiperparâmetros
+        verbose=0
+    )
+    gs_ridge.fit(X_train, y_train)
+    print("Melhores parâmetros:", gs_ridge.best_params_)
+    print("Melhor MSE (CV):", -gs_ridge.best_score_)
+    saveToPickle(gs_ridge, "ridgeTrained")
 
 def ridgePred(X_test):
     model = loadFromPickle("ridgeTrained")

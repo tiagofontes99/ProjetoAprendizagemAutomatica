@@ -15,9 +15,8 @@ from project.pickle.pickleFun import saveToPickle, loadFromPickle
 #neg_mean_absolute_error" negativo do MAE.
 
 def lassoTrain(X_train, y_train):
-
     param_lasso = {
-        "model__alpha": np.logspace(-3,3,1000)
+        "model__alpha": np.logspace(-3, 3, 1000)
     }
 
     pipeline = Pipeline([
@@ -26,13 +25,12 @@ def lassoTrain(X_train, y_train):
         ("lasso", Lasso(random_state=42, max_iter=10000))
     ])
 
-
     param_grid = {
-        "poly__degree": [1, 2, 3, 4, 5],
+        "poly__degree": [1, 2, 3, 4, 5 , 6 ,7],
         "lasso__alpha": np.logspace(-2, 4, 20)
     }
 
-    #pipeline.fit(X_train, y_train)
+
     cv = KFold(n_splits=5, shuffle=True, random_state=42)
 
     gs_lasso = GridSearchCV(
@@ -45,7 +43,8 @@ def lassoTrain(X_train, y_train):
         verbose=0
     )
     gs_lasso.fit(X_train, y_train)
-
+    print("Melhores parâmetros:", gs_lasso.best_params_)
+    print("Melhor MSE (CV):", -gs_lasso.best_score_)
     saveToPickle(gs_lasso , "lassoTrained")
 
 def lassoPred(X_test):
