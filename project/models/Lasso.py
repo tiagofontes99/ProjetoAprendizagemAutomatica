@@ -2,27 +2,18 @@ import numpy as np
 from sklearn.linear_model import Lasso
 from sklearn.model_selection import GridSearchCV, KFold
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler, PolynomialFeatures
+from sklearn.preprocessing import StandardScaler, PolynomialFeatures, RobustScaler
 from project.pickle.pickleFun import saveToPickle, loadFromPickle
 
 
-# procura paramentros entre 10 elevado a -3 ou seja 0.001 ate 10 eevado a 3 = 1000 e faz 100 iterações
- #entre esses valorea a procurar os melhores
-# grid de hiperparâmetros
-#r2  coeficiente de determinação.
-#neg_mean_squared_error" negativo do MSE.
-#neg_root_mean_squared_error" negativo do RMSE.
-#neg_mean_absolute_error" negativo do MAE.
+
 
 def lassoTrain(X_train, y_train):
-    param_lasso = {
-        "model__alpha": np.logspace(-3, 3, 1000)
-    }
 
     pipeline = Pipeline([
-        ("poly", PolynomialFeatures(degree=4, include_bias=False)),
+        ("poly", PolynomialFeatures( include_bias=False)),
         ("scaler", StandardScaler()),
-        ("lasso", Lasso(random_state=42, max_iter=10000))
+        ("lasso", Lasso(random_state=42, max_iter=100000))
     ])
 
     param_grid = {
@@ -31,13 +22,13 @@ def lassoTrain(X_train, y_train):
     }
 
 
-    cv = KFold(n_splits=5, shuffle=True, random_state=42)
+    cv_lasso= KFold(n_splits=5, shuffle=True, random_state=42)
 
     gs_lasso = GridSearchCV(
         estimator=pipeline,
         param_grid=param_grid,
         scoring="neg_mean_squared_error",
-        cv=cv,
+        cv=cv_lasso,
         n_jobs=-1,
         refit=True,
         verbose=0

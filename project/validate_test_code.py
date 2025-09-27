@@ -1,7 +1,7 @@
 
 import numpy as np
 from mymodel import predict
-#Generate dummy random data X of size (300,6) and y of size (300,)
+#Generate dummy random data X of size (300,6) and y of size (300)
 X_test = np.random.rand(300, 6)
 y_test = np.random.rand(300)
 # Make the predictions
